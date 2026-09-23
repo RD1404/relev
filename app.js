@@ -9,6 +9,25 @@
   var confirmation = $('#confirmation');
 
   function credentials(kind) { return readJSON('jirama_' + kind) || {}; }
+  function isConfigured(kind) { var c = credentials(kind); return !!(c.ref && c.num); }
+  function refreshAvailability() {
+    var kinds = ['ELEC', 'EAU'];
+    for (var i = 0; i < kinds.length; i++) {
+      var kind = kinds[i], available = isConfigured(kind);
+      var card = document.querySelector('.type-card[data-type="' + kind + '"]');
+      card.disabled = !available;
+      if (available) card.classList.remove('unavailable'); else {
+        card.classList.add('unavailable'); card.classList.remove('selected');
+        card.setAttribute('aria-pressed', 'false'); localStorage.removeItem('info_' + kind);
+      }
+    }
+    if (!isConfigured(type)) {
+      if (isConfigured('ELEC')) type = 'ELEC';
+      else if (isConfigured('EAU')) type = 'EAU';
+      else { showInfo(null); $('#submitButton').disabled = true; return; }
+    }
+    setType(type);
+  }
   function fill() {
     var e = credentials('ELEC'), w = credentials('EAU');
     $('#elecRef').value = e.ref || ''; $('#elecNum').value = e.num || '';
@@ -68,7 +87,7 @@
   $('#confirmSave').onclick = function () {
     localStorage.setItem('jirama_ELEC', JSON.stringify({ ref: $('#elecRef').value.replace(/^\s+|\s+$/g, ''), num: $('#elecNum').value.replace(/^\s+|\s+$/g, '') }));
     localStorage.setItem('jirama_EAU', JSON.stringify({ ref: $('#eauRef').value.replace(/^\s+|\s+$/g, ''), num: $('#eauNum').value.replace(/^\s+|\s+$/g, '') }));
-    confirmation.hidden = true; settings.hidden = true; status('Configuration enregistrée.', 'success'); verifyClient();
+    confirmation.hidden = true; settings.hidden = true; status('Configuration enregistrée.', 'success'); refreshAvailability();
   };
   $('#submitButton').onclick = function () {
     var c = credentials(type), reading = $('#reading').value.replace(/^\s+|\s+$/g, ''), button = this;
@@ -83,5 +102,5 @@
     });
   };
   if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js'); });
-  setType(type);
+  refreshAvailability();
 }());
