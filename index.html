@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#e43d34">
+  <meta name="description" content="Envoyez rapidement vos auto-relevés JIRAMA d'électricité et d'eau.">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./manifest.css">
+  <title>Auto-Relevé Express</title>
+</head>
+<body>
+<main class="app-shell">
+  <div class="top-stripe"></div>
+  <header class="header">
+    <button id="menuButton" class="icon-button" aria-label="Ouvrir la configuration" aria-controls="settings" aria-expanded="false"><span></span><span></span><span></span></button>
+    <h1>Auto-Relevé <em>Express</em></h1>
+  </header>
+
+  <section class="selector-panel" aria-label="Type de relevé">
+    <div id="period" class="period unknown">PÉRIODE : <span id="periodDates">À VÉRIFIER</span></div>
+    <div class="period-rule"></div>
+    <div class="types">
+      <button class="type-card selected" data-type="ELEC" aria-pressed="true">
+        <svg class="bulb" viewBox="0 0 100 130" aria-hidden="true"><path class="bulb-glow" d="M50 4C25 4 7 23 7 47c0 17 9 29 21 39 5 4 7 10 7 16h30c0-6 2-12 7-16 12-10 21-22 21-39C93 23 75 4 50 4Z"/><path class="bulb-line" d="M39 101h23M38 108h24M42 116h16M35 58l10 11 6-21 7 21 9-11M50 48v53"/><path class="bulb-base" d="M37 99h26v17c0 7-6 11-13 11s-13-4-13-11Z"/></svg><strong>ÉLECTRICITÉ</strong>
+      </button>
+      <button class="type-card" data-type="EAU" aria-pressed="false">
+        <svg class="drop" viewBox="0 0 80 110" aria-hidden="true"><path d="M40 2S5 50 5 72a35 35 0 0 0 70 0C75 50 40 2 40 2Z"/></svg><strong>EAU</strong>
+      </button>
+    </div>
+  </section>
+
+  <section class="reading-panel">
+    <div id="clientName" class="client-name">CLIENT À VÉRIFIER</div>
+    <label for="reading">📟 <span>Nouvelle lecture</span></label>
+    <input id="reading" inputmode="numeric" pattern="[0-9]*" placeholder="Ex : 2445…" autocomplete="off">
+    <button id="submitButton" class="primary">Envoyer relevé ÉLEC</button>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <footer><a href="https://t.me/Randy_mirado" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le compte Telegram de Randy Mirado">© RANDY MIRADO</a></footer>
+</main>
+
+<div id="settings" class="modal" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="dialog-head"><h2 id="settingsTitle">Configuration</h2><button class="close" data-close aria-label="Fermer">×</button></div>
+    <p class="hint">Vos identifiants restent enregistrés uniquement sur cet appareil.</p>
+    <fieldset><legend>⚡ Électricité</legend><label>Référence client<input id="elecRef" inputmode="numeric"></label><label>Numéro client JIRAMA<input id="elecNum" inputmode="numeric"></label></fieldset>
+    <fieldset><legend>💧 Eau</legend><label>Référence client<input id="eauRef" inputmode="numeric"></label><label>Numéro client JIRAMA<input id="eauNum" inputmode="numeric"></label></fieldset>
+    <div class="dialog-actions"><button class="secondary" data-close>Annuler</button><button id="saveSettings" class="primary small">Enregistrer</button></div>
+  </div>
+</div>
+
+<div id="confirmation" class="modal" hidden>
+  <div class="dialog confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="warning">!</div><h2 id="confirmTitle">Confirmer les modifications ?</h2>
+    <p>Les identifiants Électricité et Eau seront remplacés sur cet appareil.</p>
+    <div class="dialog-actions"><button id="cancelSave" class="secondary">Annuler</button><button id="confirmSave" class="primary small">Confirmer</button></div>
+  </div>
+</div>
+<script src="./app.js" defer></script>
+</body>
+</html>

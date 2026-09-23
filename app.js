@@ -1,0 +1,86 @@
+/* Compatible avec Safari iOS 9 : ES5 + XMLHttpRequest, sans fetch/async. */
+(function () {
+  'use strict';
+  function $(selector) { return document.querySelector(selector); }
+  function each(selector, callback) { var nodes = document.querySelectorAll(selector); for (var i = 0; i < nodes.length; i++) callback(nodes[i], i); }
+  function readJSON(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
+  var type = localStorage.getItem('selectedType') || 'ELEC';
+  var settings = $('#settings');
+  var confirmation = $('#confirmation');
+
+  function credentials(kind) { return readJSON('jirama_' + kind) || {}; }
+  function fill() {
+    var e = credentials('ELEC'), w = credentials('EAU');
+    $('#elecRef').value = e.ref || ''; $('#elecNum').value = e.num || '';
+    $('#eauRef').value = w.ref || ''; $('#eauNum').value = w.num || '';
+  }
+  function showInfo(info) {
+    var period = $('#period');
+    if (!info) {
+      $('#clientName').textContent = 'CLIENT À VÉRIFIER';
+      $('#periodDates').textContent = 'À VÉRIFIER';
+      period.className = 'period unknown'; return;
+    }
+    $('#clientName').textContent = info.clientName || 'CLIENT JIRAMA';
+    $('#periodDates').textContent = info.periodDates || 'NON DISPONIBLE';
+    period.className = 'period ' + (info.inPeriod ? '' : 'outside');
+  }
+  function status(message, kind) { var el = $('#status'); el.textContent = message; el.className = 'status ' + (kind || ''); }
+  function request(data, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/submit', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      var result;
+      try { result = JSON.parse(xhr.responseText); } catch (e) { result = { success: false, message: 'Réponse du serveur invalide.' }; }
+      callback(xhr.status >= 200 && xhr.status < 300 && result.success, result);
+    };
+    xhr.onerror = function () { callback(false, { message: 'Connexion au serveur impossible.' }); };
+    xhr.send(JSON.stringify(data));
+  }
+  function setType(kind, verify) {
+    type = kind; localStorage.setItem('selectedType', kind);
+    each('.type-card', function (card) {
+      var selected = card.getAttribute('data-type') === kind;
+      if (selected) card.classList.add('selected'); else card.classList.remove('selected');
+      card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    $('#submitButton').textContent = 'Envoyer relevé ' + (kind === 'ELEC' ? 'ÉLEC' : 'EAU');
+    showInfo(readJSON('info_' + kind));
+    if (verify !== false && credentials(kind).ref) verifyClient();
+  }
+  function verifyClient() {
+    var c = credentials(type); if (!c.ref || !c.num) return;
+    status('Vérification des informations…');
+    request({ ref: c.ref, num: c.num, action: 'verify' }, function (ok, result) {
+      if (!ok) { status(result.message || 'Vérification impossible.', 'error'); return; }
+      localStorage.setItem('info_' + type, JSON.stringify(result)); showInfo(result);
+      status('Informations JIRAMA actualisées.', 'success');
+    });
+  }
+  $('#menuButton').onclick = function () { fill(); settings.hidden = false; this.setAttribute('aria-expanded', 'true'); };
+  each('[data-close]', function (button) { button.onclick = function () { settings.hidden = true; $('#menuButton').setAttribute('aria-expanded', 'false'); }; });
+  each('.type-card', function (card) { card.onclick = function () { setType(card.getAttribute('data-type')); }; });
+  $('#saveSettings').onclick = function () { confirmation.hidden = false; };
+  $('#cancelSave').onclick = function () { confirmation.hidden = true; };
+  $('#confirmSave').onclick = function () {
+    localStorage.setItem('jirama_ELEC', JSON.stringify({ ref: $('#elecRef').value.replace(/^\s+|\s+$/g, ''), num: $('#elecNum').value.replace(/^\s+|\s+$/g, '') }));
+    localStorage.setItem('jirama_EAU', JSON.stringify({ ref: $('#eauRef').value.replace(/^\s+|\s+$/g, ''), num: $('#eauNum').value.replace(/^\s+|\s+$/g, '') }));
+    confirmation.hidden = true; settings.hidden = true; status('Configuration enregistrée.', 'success'); verifyClient();
+  };
+  $('#submitButton').onclick = function () {
+    var c = credentials(type), reading = $('#reading').value.replace(/^\s+|\s+$/g, ''), button = this;
+    if (!c.ref || !c.num) { status('Configurez d’abord les identifiants dans le menu.', 'error'); return; }
+    if (!/^\d+$/.test(reading)) { status('Saisissez un index numérique valide.', 'error'); return; }
+    button.disabled = true; status('Envoi du relevé en cours…');
+    request({ ref: c.ref, num: c.num, reading: reading, action: 'submit' }, function (ok, result) {
+      button.disabled = false;
+      if (!ok) { status(result.message || 'Envoi refusé.', 'error'); return; }
+      showInfo(result); localStorage.setItem('info_' + type, JSON.stringify(result)); $('#reading').value = '';
+      status(result.message || 'Relevé transmis.', 'success');
+    });
+  };
+  if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js'); });
+  setType(type);
+}());
