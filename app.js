@@ -74,8 +74,8 @@
   function showInfo(info) {
     var period = $('#period'), submit = $('#submitButton');
     if (!info || !info.clientName || !info.periodDates || info.periodDates === 'NON DISPONIBLE') {
-      $('#clientName').textContent = 'CLIENT À VÉRIFIER';
-      $('#periodDates').textContent = 'À VÉRIFIER';
+      $('#clientName').textContent = 'REFERENCE ABSENTE';
+      $('#periodDates').textContent = 'À CONFIGURER';
       period.className = 'period unknown'; setSubmitEnabled(false); return;
     }
     $('#clientName').textContent = info.clientName;

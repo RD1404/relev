@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#e43d34">
   <meta name="description" content="Envoyez rapidement vos auto-relevés JIRAMA d'électricité et d'eau.">
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
   <link rel="stylesheet" href="./manifest.css">
   <title>Auto-Relevé Express</title>
 </head>
@@ -20,7 +20,7 @@
   </header>
 
   <section class="selector-panel" aria-label="Type de relevé">
-    <div id="period" class="period unknown">PÉRIODE : <span id="periodDates">À VÉRIFIER</span></div>
+    <div id="period" class="period unknown">P: <span id="periodDates">À CONFIGURER</span></div>
     <div class="period-rule"></div>
     <div class="types">
       <button class="type-card selected" data-type="ELEC" aria-pressed="true">
@@ -33,22 +33,23 @@
   </section>
 
   <section class="reading-panel">
-    <div id="clientName" class="client-name">CLIENT À VÉRIFIER</div>
+    <div id="clientName" class="client-name">REFERENCE ABSENTE</div>
     <label for="reading">📟 <span>Nouvelle lecture</span></label>
-    <input id="reading" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off" aria-label="Nouvelle lecture">
+    <input id="reading" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" placeholder="" autocomplete="off" aria-label="Nouvelle lecture de 5 chiffres">
     <button id="submitButton" class="primary inactive" aria-disabled="true" data-disabled-message="Ajoutez les références dans le menu">Envoyer relevé ÉLEC</button>
     <p id="status" class="status" role="status" aria-live="polite"></p>
   </section>
 
   <footer><a href="https://t.me/Randy_mirado" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le compte Telegram de Randy Mirado">© RANDY MIRADO</a></footer>
 </main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <div id="settings" class="modal" hidden>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="dialog-head"><h2 id="settingsTitle">Configuration</h2><button class="close" data-close aria-label="Fermer">×</button></div>
     <p class="hint">Vos identifiants restent enregistrés uniquement sur cet appareil.</p>
-    <fieldset><legend>⚡ Électricité</legend><label>Référence client — 11 chiffres<input id="elecRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>Numéro client JIRAMA — 8 chiffres<input id="elecNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
-    <fieldset><legend>💧 Eau</legend><label>Référence client — 11 chiffres<input id="eauRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>Numéro client JIRAMA — 8 chiffres<input id="eauNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
+    <fieldset><legend>⚡ Électricité</legend><label>Référence client<input id="elecRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>N° client<input id="elecNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
+    <fieldset><legend>💧 Eau</legend><label>Référence client<input id="eauRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>N° client<input id="eauNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
     <div class="dialog-actions"><button class="secondary" data-close>Annuler</button><button id="saveSettings" class="primary small">Enregistrer</button></div>
   </div>
 </div>
