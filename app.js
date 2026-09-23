@@ -7,6 +7,24 @@
   var type = localStorage.getItem('selectedType') || 'ELEC';
   var settings = $('#settings');
   var confirmation = $('#confirmation');
+  var initialSettings = '';
+
+  function settingsValues() {
+    return [$('#elecRef').value, $('#elecNum').value, $('#eauRef').value, $('#eauNum').value];
+  }
+  function validPair(ref, num) {
+    return (ref === '' && num === '') || (/^\d{11}$/.test(ref) && /^\d{8}$/.test(num));
+  }
+  function updateSaveButton() {
+    var values = settingsValues();
+    var valid = validPair(values[0], values[1]) && validPair(values[2], values[3]);
+    var changed = JSON.stringify(values) !== initialSettings;
+    $('#saveSettings').disabled = !(valid && changed);
+    var inputs = [$('#elecRef'), $('#elecNum'), $('#eauRef'), $('#eauNum')];
+    for (var i = 0; i < inputs.length; i++) inputs[i].classList.remove('invalid');
+    if (!validPair(values[0], values[1])) { inputs[0].classList.add('invalid'); inputs[1].classList.add('invalid'); }
+    if (!validPair(values[2], values[3])) { inputs[2].classList.add('invalid'); inputs[3].classList.add('invalid'); }
+  }
 
   function credentials(kind) { return readJSON('jirama_' + kind) || {}; }
   function isConfigured(kind) { var c = credentials(kind); return !!(c.ref && c.num); }
@@ -79,10 +97,14 @@
       status('Informations JIRAMA actualisées.', 'success');
     });
   }
-  $('#menuButton').onclick = function () { fill(); settings.hidden = false; this.setAttribute('aria-expanded', 'true'); };
+  $('#menuButton').onclick = function () {
+    fill(); initialSettings = JSON.stringify(settingsValues()); updateSaveButton();
+    settings.hidden = false; this.setAttribute('aria-expanded', 'true');
+  };
   each('[data-close]', function (button) { button.onclick = function () { settings.hidden = true; $('#menuButton').setAttribute('aria-expanded', 'false'); }; });
   each('.type-card', function (card) { card.onclick = function () { setType(card.getAttribute('data-type')); }; });
-  $('#saveSettings').onclick = function () { confirmation.hidden = false; };
+  each('#elecRef,#elecNum,#eauRef,#eauNum', function (input) { input.oninput = function () { this.value = this.value.replace(/\D/g, ''); updateSaveButton(); }; });
+  $('#saveSettings').onclick = function () { if (!this.disabled) confirmation.hidden = false; };
   $('#cancelSave').onclick = function () { confirmation.hidden = true; };
   $('#confirmSave').onclick = function () {
     localStorage.setItem('jirama_ELEC', JSON.stringify({ ref: $('#elecRef').value.replace(/^\s+|\s+$/g, ''), num: $('#elecNum').value.replace(/^\s+|\s+$/g, '') }));

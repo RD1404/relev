@@ -46,8 +46,8 @@
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="dialog-head"><h2 id="settingsTitle">Configuration</h2><button class="close" data-close aria-label="Fermer">×</button></div>
     <p class="hint">Vos identifiants restent enregistrés uniquement sur cet appareil.</p>
-    <fieldset><legend>⚡ Électricité</legend><label>Référence client<input id="elecRef" inputmode="numeric"></label><label>Numéro client JIRAMA<input id="elecNum" inputmode="numeric"></label></fieldset>
-    <fieldset><legend>💧 Eau</legend><label>Référence client<input id="eauRef" inputmode="numeric"></label><label>Numéro client JIRAMA<input id="eauNum" inputmode="numeric"></label></fieldset>
+    <fieldset><legend>⚡ Électricité</legend><label>Référence client — 11 chiffres<input id="elecRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>Numéro client JIRAMA — 8 chiffres<input id="elecNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
+    <fieldset><legend>💧 Eau</legend><label>Référence client — 11 chiffres<input id="eauRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>Numéro client JIRAMA — 8 chiffres<input id="eauNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
     <div class="dialog-actions"><button class="secondary" data-close>Annuler</button><button id="saveSettings" class="primary small">Enregistrer</button></div>
   </div>
 </div>
