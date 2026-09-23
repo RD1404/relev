@@ -8,6 +8,18 @@
   var settings = $('#settings');
   var confirmation = $('#confirmation');
   var initialSettings = '';
+  var installPrompt = null, toastTimer = null;
+  function showToast(message) {
+    var toast = $('#toast'); toast.textContent = message; toast.className = 'toast visible';
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.className = 'toast'; }, 2000);
+  }
+  function isInstalled() { return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }
+  function updateInstallButton() {
+    var button = $('#installButton'), installed = isInstalled();
+    button.disabled = installed; button.className = 'install-button' + (installed ? ' installed' : '');
+    button.title = installed ? 'Application déjà installée' : 'Installer l’application';
+  }
 
   function settingsValues() {
     return [$('#elecRef').value, $('#elecNum').value, $('#eauRef').value, $('#eauNum').value];
@@ -33,7 +45,7 @@
     for (var i = 0; i < kinds.length; i++) {
       var kind = kinds[i], available = isConfigured(kind);
       var card = document.querySelector('.type-card[data-type="' + kind + '"]');
-      card.disabled = !available;
+      card.setAttribute('aria-disabled', available ? 'false' : 'true');
       if (available) card.classList.remove('unavailable'); else {
         card.classList.add('unavailable'); card.classList.remove('selected');
         card.setAttribute('aria-pressed', 'false'); localStorage.removeItem('info_' + kind);
@@ -102,7 +114,10 @@
     settings.hidden = false; this.setAttribute('aria-expanded', 'true');
   };
   each('[data-close]', function (button) { button.onclick = function () { settings.hidden = true; $('#menuButton').setAttribute('aria-expanded', 'false'); }; });
-  each('.type-card', function (card) { card.onclick = function () { setType(card.getAttribute('data-type')); }; });
+  each('.type-card', function (card) { card.onclick = function () {
+    if (card.getAttribute('aria-disabled') === 'true') { showToast('Ajoutez Références dans le menu'); return; }
+    setType(card.getAttribute('data-type'));
+  }; });
   each('#elecRef,#elecNum,#eauRef,#eauNum', function (input) { input.oninput = function () { this.value = this.value.replace(/\D/g, ''); updateSaveButton(); }; });
   $('#saveSettings').onclick = function () { if (!this.disabled) confirmation.hidden = false; };
   $('#cancelSave').onclick = function () { confirmation.hidden = true; };
@@ -114,7 +129,7 @@
   $('#submitButton').onclick = function () {
     var c = credentials(type), reading = $('#reading').value.replace(/^\s+|\s+$/g, ''), button = this;
     if (!c.ref || !c.num) { status('Configurez d’abord les identifiants dans le menu.', 'error'); return; }
-    if (!/^\d+$/.test(reading)) { status('Saisissez un index numérique valide.', 'error'); return; }
+    if (!/^\d{5}$/.test(reading)) { status('Saisissez un relevé de 5 chiffres.', 'error'); return; }
     button.disabled = true; status('Envoi du relevé en cours…');
     request({ ref: c.ref, num: c.num, reading: reading, action: 'submit' }, function (ok, result) {
       button.disabled = false;
@@ -123,6 +138,18 @@
       status(result.message || 'Relevé transmis.', 'success');
     });
   };
+  $('#reading').oninput = function () { this.value = this.value.replace(/\D/g, '').slice(0, 5); };
+  window.addEventListener('beforeinstallprompt', function (event) { event.preventDefault(); installPrompt = event; updateInstallButton(); });
+  window.addEventListener('appinstalled', function () { installPrompt = null; updateInstallButton(); showToast('Application installée'); });
+  $('#installButton').onclick = function () {
+    if (isInstalled()) return;
+    if (installPrompt) {
+      installPrompt.prompt();
+      if (installPrompt.userChoice && installPrompt.userChoice.then) installPrompt.userChoice.then(function () { installPrompt = null; updateInstallButton(); });
+    } else if (/iPad|iPhone|iPod/.test(navigator.userAgent)) showToast('Safari : Partager, puis Sur l’écran d’accueil');
+    else showToast('Utilisez le menu du navigateur puis Installer l’application');
+  };
+  updateInstallButton();
   if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js'); });
   refreshAvailability();
 }());
