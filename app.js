@@ -15,15 +15,16 @@
     $('#eauRef').value = w.ref || ''; $('#eauNum').value = w.num || '';
   }
   function showInfo(info) {
-    var period = $('#period');
-    if (!info) {
+    var period = $('#period'), submit = $('#submitButton');
+    if (!info || !info.clientName || !info.periodDates || info.periodDates === 'NON DISPONIBLE') {
       $('#clientName').textContent = 'CLIENT À VÉRIFIER';
       $('#periodDates').textContent = 'À VÉRIFIER';
-      period.className = 'period unknown'; return;
+      period.className = 'period unknown'; submit.disabled = true; return;
     }
-    $('#clientName').textContent = info.clientName || 'CLIENT JIRAMA';
-    $('#periodDates').textContent = info.periodDates || 'NON DISPONIBLE';
+    $('#clientName').textContent = info.clientName;
+    $('#periodDates').textContent = info.periodDates;
     period.className = 'period ' + (info.inPeriod ? '' : 'outside');
+    submit.disabled = false;
   }
   function status(message, kind) { var el = $('#status'); el.textContent = message; el.className = 'status ' + (kind || ''); }
   function request(data, callback) {
