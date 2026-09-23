@@ -20,7 +20,7 @@
   </header>
 
   <section class="selector-panel" aria-label="Type de relevé">
-    <div id="period" class="period unknown">P: <span id="periodDates">À CONFIGURER</span></div>
+    <div id="period" class="period unknown">PÉRIODE : <span id="periodDates">À VÉRIFIER</span></div>
     <div class="period-rule"></div>
     <div class="types">
       <button class="type-card selected" data-type="ELEC" aria-pressed="true">
@@ -33,10 +33,10 @@
   </section>
 
   <section class="reading-panel">
-    <div id="clientName" class="client-name">REFERENCE ABSENTE</div>
+    <div id="clientName" class="client-name">CLIENT À VÉRIFIER</div>
     <label for="reading">📟 <span>Nouvelle lecture</span></label>
     <input id="reading" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off" aria-label="Nouvelle lecture">
-    <button id="submitButton" class="primary" disabled>Envoyer relevé ÉLEC</button>
+    <button id="submitButton" class="primary inactive" aria-disabled="true" data-disabled-message="Ajoutez les références dans le menu">Envoyer relevé ÉLEC</button>
     <p id="status" class="status" role="status" aria-live="polite"></p>
   </section>
 
@@ -47,8 +47,8 @@
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="dialog-head"><h2 id="settingsTitle">Configuration</h2><button class="close" data-close aria-label="Fermer">×</button></div>
     <p class="hint">Vos identifiants restent enregistrés uniquement sur cet appareil.</p>
-    <fieldset><legend>⚡ Électricité</legend><label>Référence client<input id="elecRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>N° Client<input id="elecNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
-    <fieldset><legend>💧 Eau</legend><label>Référence client<input id="eauRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>N° Client<input id="eauNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
+    <fieldset><legend>⚡ Électricité</legend><label>Référence client — 11 chiffres<input id="elecRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>Numéro client JIRAMA — 8 chiffres<input id="elecNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
+    <fieldset><legend>💧 Eau</legend><label>Référence client — 11 chiffres<input id="eauRef" inputmode="numeric" pattern="[0-9]{11}" maxlength="11"></label><label>Numéro client JIRAMA — 8 chiffres<input id="eauNum" inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label></fieldset>
     <div class="dialog-actions"><button class="secondary" data-close>Annuler</button><button id="saveSettings" class="primary small">Enregistrer</button></div>
   </div>
 </div>

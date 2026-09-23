@@ -21,6 +21,13 @@
     button.title = installed ? 'Application déjà installée' : 'Installer l’application';
   }
 
+  function setSubmitEnabled(enabled, message) {
+    var button = $('#submitButton');
+    button.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    button.className = 'primary' + (enabled ? '' : ' inactive');
+    button.setAttribute('data-disabled-message', message || 'Ajoutez les références dans le menu');
+  }
+
   function settingsValues() {
     return [$('#elecRef').value, $('#elecNum').value, $('#eauRef').value, $('#eauNum').value];
   }
@@ -45,6 +52,7 @@
     for (var i = 0; i < kinds.length; i++) {
       var kind = kinds[i], available = isConfigured(kind);
       var card = document.querySelector('.type-card[data-type="' + kind + '"]');
+      card.disabled = false;
       card.setAttribute('aria-disabled', available ? 'false' : 'true');
       if (available) card.classList.remove('unavailable'); else {
         card.classList.add('unavailable'); card.classList.remove('selected');
@@ -54,7 +62,7 @@
     if (!isConfigured(type)) {
       if (isConfigured('ELEC')) type = 'ELEC';
       else if (isConfigured('EAU')) type = 'EAU';
-      else { showInfo(null); $('#submitButton').disabled = true; return; }
+      else { showInfo(null); setSubmitEnabled(false); return; }
     }
     setType(type);
   }
@@ -68,12 +76,12 @@
     if (!info || !info.clientName || !info.periodDates || info.periodDates === 'NON DISPONIBLE') {
       $('#clientName').textContent = 'CLIENT À VÉRIFIER';
       $('#periodDates').textContent = 'À VÉRIFIER';
-      period.className = 'period unknown'; submit.disabled = true; return;
+      period.className = 'period unknown'; setSubmitEnabled(false); return;
     }
     $('#clientName').textContent = info.clientName;
     $('#periodDates').textContent = info.periodDates;
     period.className = 'period ' + (info.inPeriod ? '' : 'outside');
-    submit.disabled = false;
+    setSubmitEnabled(true);
   }
   function status(message, kind) { var el = $('#status'); el.textContent = message; el.className = 'status ' + (kind || ''); }
   function request(data, callback) {
@@ -102,9 +110,9 @@
   }
   function verifyClient() {
     var c = credentials(type); if (!c.ref || !c.num) return;
-    status('Vérification des informations…');
+    status('Vérification des informations…'); setSubmitEnabled(false, 'Informations JIRAMA en cours de chargement');
     request({ ref: c.ref, num: c.num, action: 'verify' }, function (ok, result) {
-      if (!ok) { status(result.message || 'Vérification impossible.', 'error'); return; }
+      if (!ok) { setSubmitEnabled(false); status(result.message || 'Vérification impossible.', 'error'); return; }
       localStorage.setItem('info_' + type, JSON.stringify(result)); showInfo(result);
       status('Informations JIRAMA actualisées.', 'success');
     });
@@ -115,7 +123,7 @@
   };
   each('[data-close]', function (button) { button.onclick = function () { settings.hidden = true; $('#menuButton').setAttribute('aria-expanded', 'false'); }; });
   each('.type-card', function (card) { card.onclick = function () {
-    if (card.getAttribute('aria-disabled') === 'true') { showToast('Ajoutez Références dans le menu'); return; }
+    if (card.getAttribute('aria-disabled') === 'true') { showToast('Ajoutez les références dans le menu'); return; }
     setType(card.getAttribute('data-type'));
   }; });
   each('#elecRef,#elecNum,#eauRef,#eauNum', function (input) { input.oninput = function () { this.value = this.value.replace(/\D/g, ''); updateSaveButton(); }; });
@@ -128,12 +136,12 @@
   };
   $('#submitButton').onclick = function () {
     var c = credentials(type), reading = $('#reading').value.replace(/^\s+|\s+$/g, ''), button = this;
-    if (!c.ref || !c.num) { status('Configurez d’abord les identifiants dans le menu.', 'error'); return; }
+    if (button.getAttribute('aria-disabled') === 'true') { showToast(button.getAttribute('data-disabled-message') || 'Ajoutez les références dans le menu'); return; }
+    if (!c.ref || !c.num) { showToast('Ajoutez les références dans le menu'); return; }
     if (!/^\d{5}$/.test(reading)) { status('Saisissez un relevé de 5 chiffres.', 'error'); return; }
-    button.disabled = true; status('Envoi du relevé en cours…');
+    setSubmitEnabled(false, 'Envoi en cours…'); status('Envoi du relevé en cours…');
     request({ ref: c.ref, num: c.num, reading: reading, action: 'submit' }, function (ok, result) {
-      button.disabled = false;
-      if (!ok) { status(result.message || 'Envoi refusé.', 'error'); return; }
+      if (!ok) { setSubmitEnabled(true); status(result.message || 'Envoi refusé.', 'error'); return; }
       showInfo(result); localStorage.setItem('info_' + type, JSON.stringify(result)); $('#reading').value = '';
       status(result.message || 'Relevé transmis.', 'success');
     });
