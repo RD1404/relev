@@ -17,6 +17,7 @@
     <button id="menuButton" class="icon-button" aria-label="Ouvrir la configuration" aria-controls="settings" aria-expanded="false"><span></span><span></span><span></span></button>
     <h1>Auto-Relevé <em>Express</em></h1>
     <button id="installButton" class="install-button" aria-label="Installer l’application" title="Installer l’application"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 3h6v12l4-4 4 4-11 11L5 15l4-4 4 4V3Z"/><path d="M5 27h22v3H5Z"/></svg></button>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
   </header>
 
   <section class="selector-panel" aria-label="Type de relevé">
@@ -37,7 +38,6 @@
     <label for="reading">📟 <span>Nouvelle lecture</span></label>
     <input id="reading" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" placeholder="" autocomplete="off" aria-label="Nouvelle lecture de 5 chiffres">
     <button id="submitButton" class="primary inactive" aria-disabled="true" data-disabled-message="Ajoutez les références dans le menu">Envoyer relevé ÉLEC</button>
-    <p id="status" class="status" role="status" aria-live="polite"></p>
   </section>
 
   <footer><a href="https://t.me/Randy_mirado" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le compte Telegram de Randy Mirado">© RANDY MIRADO</a></footer>
