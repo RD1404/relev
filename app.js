@@ -146,8 +146,9 @@
     if (button.getAttribute('aria-disabled') === 'true') { showToast(button.getAttribute('data-disabled-message') || 'Ajoutez les références dans le menu'); return; }
     if (!c.ref || !c.num) { showToast('Ajoutez les références dans le menu'); return; }
     if (!/^\d{5}$/.test(reading)) { status('Saisissez un relevé de 5 chiffres.', 'error'); return; }
-    setSubmitEnabled(false, 'Envoi en cours…'); status('Envoi du relevé en cours…');
+    setSubmitEnabled(false, 'Envoi en cours…'); status('Envoi du relevé en cours…'); setLoading(true);
     request({ ref: c.ref, num: c.num, reading: reading, action: 'submit' }, function (ok, result) {
+      setLoading(false);
       if (!ok) { setSubmitEnabled(true); status(result.message || 'Envoi refusé.', 'error'); return; }
       showInfo(result); localStorage.setItem('info_' + type, JSON.stringify(result)); $('#reading').value = '';
       status(result.message || 'Relevé transmis.', 'success');
