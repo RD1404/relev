@@ -21,6 +21,12 @@
     button.title = installed ? 'Application déjà installée' : 'Installer l’application';
   }
 
+  function setLoading(loading) {
+    var overlay = $('#loadingOverlay');
+    overlay.hidden = !loading;
+    document.body.setAttribute('aria-busy', loading ? 'true' : 'false');
+  }
+
   function setSubmitEnabled(enabled, message) {
     var button = $('#submitButton');
     button.setAttribute('aria-disabled', enabled ? 'false' : 'true');
@@ -110,8 +116,9 @@
   }
   function verifyClient() {
     var c = credentials(type); if (!c.ref || !c.num) return;
-    status('Vérification des informations…'); setSubmitEnabled(false, 'Informations JIRAMA en cours de chargement');
+    status('Vérification des informations…'); setSubmitEnabled(false, 'Informations JIRAMA en cours de chargement'); setLoading(true);
     request({ ref: c.ref, num: c.num, action: 'verify' }, function (ok, result) {
+      setLoading(false);
       if (!ok) { setSubmitEnabled(false); status(result.message || 'Vérification impossible.', 'error'); return; }
       localStorage.setItem('info_' + type, JSON.stringify(result)); showInfo(result);
       status('Informations JIRAMA actualisées.', 'success');
